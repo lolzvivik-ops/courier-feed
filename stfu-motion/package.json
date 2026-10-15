@@ -1,0 +1,39 @@
+{
+  "name": "stfu-motion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "iOS-UI storytelling motion piece synced to STFU (Yeat), built with Remotion",
+  "scripts": {
+    "studio": "remotion studio",
+    "typecheck": "tsc --noEmit",
+    "analyze": ".venv/bin/python scripts/analyze_beats.py public/stfu.mp3 src/data/beats.json",
+    "timeline": "tsx scripts/export_timeline.ts",
+    "audio": "npm run timeline && .venv/bin/python scripts/prepare_audio.py",
+    "sfx": ".venv/bin/python scripts/make_sfx.py",
+    "sync-report": "npm run timeline && .venv/bin/python scripts/sync_report.py",
+    "check-text": "tsx scripts/check_text.ts",
+    "stills": "node scripts/render_stills.mjs",
+    "preview": "remotion render STFU-9x16 out/preview_540x960.mp4 --scale=0.5 --codec=h264 --crf=15 --pixel-format=yuv420p --color-space=bt709 --audio-codec=aac --audio-bitrate=320k",
+    "render": "remotion render STFU-9x16 out/stfu_1080x1920_60fps.mp4 --codec=h264 --crf=15 --pixel-format=yuv420p --color-space=bt709 --audio-codec=aac --audio-bitrate=320k",
+    "render:30": "remotion render STFU-9x16-30fps out/stfu_1080x1920_30fps.mp4 --codec=h264 --crf=15 --pixel-format=yuv420p --color-space=bt709 --audio-codec=aac --audio-bitrate=320k",
+    "render:square": "remotion render STFU-1x1 out/stfu_1080x1080_60fps.mp4 --codec=h264 --crf=15 --pixel-format=yuv420p --color-space=bt709 --audio-codec=aac --audio-bitrate=320k",
+    "mix-check": "remotion render STFU-9x16 out/mix_check.wav --codec=wav --audio-codec=pcm-16 --props='{\"format\":\"9x16\",\"samples\":1}' && .venv/bin/python scripts/check_mix.py out/mix_check.wav",
+    "check-static": ".venv/bin/python scripts/check_static.py out/preview_540x960.mp4"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/inter-tight": "5.3.0",
+    "@remotion/cli": "4.0.535",
+    "@remotion/fonts": "4.0.535",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.535"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

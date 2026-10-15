@@ -1,0 +1,20 @@
+# This folder is a standalone Remotion project. The repo-level .gitignore hides
+# *.json / *.py as a safety net for the feed; re-include this project's own
+# configs and scripts (only inside this folder).
+!*.json
+!*.py
+
+node_modules/
+.venv/
+.cache/
+out/
+__pycache__/
+
+# The track is copyrighted and this repository is public: never commit it, nor
+# anything rendered or decoded from it. Drop your copy at public/stfu.mp3.
+public/stfu.mp3
+public/generated/
+*.mp4
+*.mov
+*.wav
+!public/sfx/*.wav
