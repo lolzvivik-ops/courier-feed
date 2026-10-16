@@ -20,14 +20,13 @@ const PH = 128;
 const BTN_Y = AH - 116;
 const MORPH = Easing.bezier(0.3, 0, 0.08, 1);
 
-/** Countdown value: a long decelerating roll 47 → 4, then 3-2-1-0 on 8ths. */
+/** Countdown on the last line's words: 47 → 9 on the 2nd, → 1 on the 3rd, → 0 on the last (then it pops). */
 const countAt = (t: number) => {
 	const o = scene('outro');
-	const start = o.cue('roll') - LEAD;
-	const steps = ['three', 'two', 'one', 'zero'].map((c) => o.cue(c) - LEAD);
-	const settle = steps[0] - 12;
-	let v = COPY.unread - (COPY.unread - 4) * EXPO_OUT(prog(t, start, settle - start));
-	for (const s of steps) v -= MOVE(prog(t, s, 7));
+	const keep = o.cue('roll') - LEAD;
+	const tellin = o.cue('roll2') - LEAD;
+	const em = o.cue('zero') - LEAD;
+	const v = COPY.unread - 38 * EXPO_OUT(prog(t, keep, 14)) - 8 * EXPO_OUT(prog(t, tellin, 14)) - MOVE(prog(t, em, 5));
 	return Math.max(0, v);
 };
 

@@ -1,0 +1,365 @@
+{
+ "source": "lyrics.txt aligned to the Demucs (htdemucs_ft) vocal stem with the MMS CTC aligner",
+ "time": "song seconds",
+ "placeholder": true,
+ "lines": [
+  {
+   "text": "\u2022 \u2022\u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022",
+     "start": 70.5074,
+     "aligned": 70.5211,
+     "end": 70.7213,
+     "conf": 0.14,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 70.8093,
+     "aligned": 70.8415,
+     "end": 72.4831,
+     "conf": 0.107,
+     "pass": "global"
+    }
+   ]
+  },
+  {
+   "text": "\u2022 \u2022\u2022 \u2022 \u2022 \u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022",
+     "start": 72.5769,
+     "aligned": 72.5832,
+     "end": 72.7234,
+     "conf": 0.1,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 72.8149,
+     "aligned": 72.8254,
+     "end": 73.1676,
+     "conf": 0.224,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 73.7176,
+     "aligned": 73.7444,
+     "end": 73.8846,
+     "conf": 0.054,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022",
+     "start": 73.8598,
+     "aligned": 73.8924,
+     "end": 73.9125,
+     "conf": 0.174,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 74.0949,
+     "aligned": 74.0736,
+     "end": 74.4158,
+     "conf": 0.249,
+     "pass": "line"
+    }
+   ]
+  },
+  {
+   "text": "\u2022 \u2022 \u2022 \u2022 \u2022\u2022\u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022",
+     "start": 76.1034,
+     "aligned": 76.0868,
+     "end": 76.2269,
+     "conf": 0.046,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022",
+     "start": 76.2776,
+     "aligned": 76.267,
+     "end": 76.3276,
+     "conf": 0.215,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022",
+     "start": 76.4546,
+     "aligned": 76.4672,
+     "end": 76.5673,
+     "conf": 0.136,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022",
+     "start": 76.9161,
+     "aligned": 76.9213,
+     "end": 77.2225,
+     "conf": 0.119,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022\u2022",
+     "start": 77.2412,
+     "aligned": 77.288,
+     "end": 78.9297,
+     "conf": 0.091,
+     "pass": "global"
+    }
+   ]
+  },
+  {
+   "text": "\u2022\u2022 \u2022\u2022\u2022 \u2022\u2022 \u2022 \u2022\u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022\u2022",
+     "start": 78.974,
+     "aligned": 78.9497,
+     "end": 79.3101,
+     "conf": 0.091,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022\u2022",
+     "start": 79.3513,
+     "aligned": 79.3947,
+     "end": 80.1429,
+     "conf": 0.062,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 80.1495,
+     "aligned": 80.1509,
+     "end": 80.3311,
+     "conf": 0.15,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022",
+     "start": 80.3643,
+     "aligned": 80.3451,
+     "end": 80.4143,
+     "conf": 0.057,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 80.5355,
+     "aligned": 80.5113,
+     "end": 80.7916,
+     "conf": 0.129,
+     "pass": "global"
+    }
+   ]
+  },
+  {
+   "text": "\u2022 \u2022\u2022\u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022",
+     "start": 80.9564,
+     "aligned": 80.9517,
+     "end": 81.1519,
+     "conf": 0.04,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022\u2022",
+     "start": 81.2873,
+     "aligned": 81.2921,
+     "end": 81.9127,
+     "conf": 0.144,
+     "pass": "global"
+    }
+   ]
+  },
+  {
+   "text": "\u2022\u2022 \u2022 \u2022\u2022\u2022 \u2022\u2022 \u2022 \u2022\u2022 \u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022\u2022",
+     "start": 82.129,
+     "aligned": 82.1329,
+     "end": 82.3532,
+     "conf": 0.157,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022",
+     "start": 82.367,
+     "aligned": 82.3932,
+     "end": 82.4733,
+     "conf": 0.02,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022\u2022",
+     "start": 82.5731,
+     "aligned": 82.5388,
+     "end": 82.9023,
+     "conf": 0.101,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 82.9736,
+     "aligned": 82.9629,
+     "end": 83.1649,
+     "conf": 0.149,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 83.1971,
+     "aligned": 83.194,
+     "end": 83.2741,
+     "conf": 0.015,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 83.3596,
+     "aligned": 83.3466,
+     "end": 83.7505,
+     "conf": 0.145,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 83.8269,
+     "aligned": 83.8313,
+     "end": 84.1141,
+     "conf": 0.004,
+     "pass": "line"
+    }
+   ]
+  },
+  {
+   "text": "\u2022 \u2022\u2022 \u2022\u2022\u2022 \u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022",
+     "start": 84.1927,
+     "aligned": 84.196,
+     "end": 84.2427,
+     "conf": 0.012,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 84.3146,
+     "aligned": 84.3151,
+     "end": 84.4953,
+     "conf": 0.213,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022\u2022",
+     "start": 84.5497,
+     "aligned": 84.5194,
+     "end": 84.9641,
+     "conf": 0.175,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 84.9647,
+     "aligned": 84.9843,
+     "end": 85.146,
+     "conf": 0.075,
+     "pass": "line"
+    }
+   ]
+  },
+  {
+   "text": "\u2022\u2022 \u2022 \u2022\u2022 \u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022\u2022",
+     "start": 86.1867,
+     "aligned": 86.209,
+     "end": 86.3702,
+     "conf": 0.073,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 86.3985,
+     "aligned": 86.3904,
+     "end": 86.471,
+     "conf": 0.003,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 86.5408,
+     "aligned": 86.5516,
+     "end": 86.9547,
+     "conf": 0.168,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 87.0487,
+     "aligned": 87.0353,
+     "end": 87.398,
+     "conf": 0.005,
+     "pass": "line"
+    }
+   ]
+  },
+  {
+   "text": "\u2022 \u2022\u2022 \u2022\u2022\u2022 \u2022",
+   "unsure": false,
+   "words": [
+    {
+     "text": "\u2022",
+     "start": 87.4144,
+     "aligned": 87.4198,
+     "end": 87.4644,
+     "conf": 0.004,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022\u2022",
+     "start": 87.5363,
+     "aligned": 87.5384,
+     "end": 87.7186,
+     "conf": 0.209,
+     "pass": "global"
+    },
+    {
+     "text": "\u2022\u2022\u2022",
+     "start": 87.725,
+     "aligned": 87.724,
+     "end": 88.1904,
+     "conf": 0.232,
+     "pass": "line"
+    },
+    {
+     "text": "\u2022",
+     "start": 88.1894,
+     "aligned": 88.2107,
+     "end": 88.4743,
+     "conf": 0.125,
+     "pass": "line"
+    }
+   ]
+  }
+ ]
+}

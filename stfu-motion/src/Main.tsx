@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {type Format, LEAD, MOTION_BLUR} from './config';
 import {Background, Grain, GrainPreload, ThemeSplit} from './components/Backdrop';
-import {Headline} from './components/Headline';
+import {Subtitles} from './components/Subtitles';
 import {MotionBlur} from './components/MotionBlur';
 import {Soundtrack} from './components/Soundtrack';
 import {LayoutProvider, Stage, useLayout} from './components/Stage';
@@ -10,7 +10,7 @@ import {smooth, useT} from './lib/motion';
 import {IntroThread} from './scenes/IntroThread';
 import {LockScene} from './scenes/LockScene';
 import {FocusScene} from './scenes/FocusScene';
-import {SilenceScene} from './scenes/SilenceScene';
+import {CallScene} from './scenes/CallScene';
 import {BlockOutro} from './scenes/BlockOutro';
 import {LIGHT, useTheme} from './theme';
 import {DROP_T} from './timeline';
@@ -59,7 +59,7 @@ const World: React.FC = () => {
 				<IntroThread />
 				<LockScene />
 				<FocusScene />
-				<SilenceScene />
+				<CallScene />
 				<BlockOutro />
 			</Stage>
 		</AbsoluteFill>
@@ -78,7 +78,7 @@ export const Main: React.FC<MainProps> = ({format, samples, muted, guides}) => (
 				<ThemeSplit>{() => <World />}</ThemeSplit>
 			</MotionBlur>
 			{/* text is not in the camera and not blurred by it: it never drifts */}
-			<ThemeSplit>{() => <Headline />}</ThemeSplit>
+			<ThemeSplit>{() => <Subtitles />}</ThemeSplit>
 			<ThemeSplit>{() => <GrainLayer />}</ThemeSplit>
 			<GrainPreload />
 			{guides ? <SafeGuides /> : null}

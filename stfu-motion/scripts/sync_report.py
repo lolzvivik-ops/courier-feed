@@ -8,16 +8,24 @@ rounded to the frame it actually lands on (60 and 30 fps) and compared to the
 nearest strong onset detected in the track (full-band onsets from beats.json
 with ≥ 30 % of the strongest onset within ±50 ms; kick onsets also count for
 the punches). Pass: mean |Δ| < 1 frame at 60 fps (16.7 ms) and
-max |Δ| ≤ 20 ms. Events with no onset within 50 ms are listed separately: they
+max |Δ| ≤ 20 ms. Sung words (and the events fired by them) are compared to
+onsets of the Demucs vocal stem instead. Events with no onset within 50 ms are listed separately: they
 sit on the grid between sounds (e.g. an 8th with no hit) and have nothing to
 be late or early against.
 """
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
+
+try:  # vocal onsets for the subtitles (needs the Demucs stem; see scripts/separate_vocals.py)
+    import librosa
+    import soundfile as sf
+except ImportError:  # pragma: no cover
+    librosa = None
 
 ROOT = Path(__file__).resolve().parent.parent
 WINDOW = 0.050
@@ -31,6 +39,16 @@ def main() -> None:
     onsets = np.array([o["t"] - a0 for o in sel])
     strength = np.array([o["s"] for o in sel])
     kicks = np.array([k["t"] - a0 for k in beats["kicks"] if a0 - 0.1 <= k["t"] <= a1 + 0.1])
+    # sung words are judged against the isolated vocal, not the full mix
+    stem = ROOT / ".cache" / "stems" / "vocals_ft.wav"
+    vocal = None
+    if librosa is not None and stem.exists() and not tl.get("lyricsPlaceholder"):
+        y, sr = sf.read(stem, dtype="float32")
+        sys.path.insert(0, str(Path(__file__).parent))
+        from vocal_onsets import vocal_onsets
+
+        y = y.mean(axis=1)[int((a0 - 0.2) * sr):int((a1 + 0.2) * sr)]
+        vocal = vocal_onsets(y, sr) + (a0 - 0.2) - a0
 
     lines = []
     summary = {}
@@ -38,6 +56,20 @@ def main() -> None:
         devs, by_kind, unmatched = [], {}, []
         for ev in tl["events"]:
             frame_t = round(ev["sec"] * fps) / fps
+            if ev.get("grid") == "vocal":
+                if vocal is None:
+                    unmatched.append(ev)
+                    continue
+                j = int(np.argmin(np.abs(vocal - frame_t)))
+                d = frame_t - vocal[j]
+                if abs(d) > WINDOW:
+                    unmatched.append(ev)
+                    continue
+                devs.append(d)
+                by_kind.setdefault(ev["kind"], []).append(d)
+                if fps == 60:
+                    lines.append(f"  {ev['kind']:12s} {ev['sec']:7.3f}s  f{round(ev['sec'] * fps):5d}  Δ {d * 1000:+6.1f} ms  {ev['id']}  (vocal)")
+                continue
             # nearest onset among the strong ones around the event (≥ 30 % of the
             # strongest within the window), so a faint ghost note can't win
             near = np.abs(onsets - frame_t) <= WINDOW

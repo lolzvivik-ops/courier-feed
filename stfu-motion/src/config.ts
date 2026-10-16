@@ -22,6 +22,9 @@ export const SYNC_OFFSET_MS = 0;
  */
 export const LEAD = 1;
 
+/** Mask profanity in the subtitles ("f*ck"): TikTok down-ranks it on screen. */
+export const CENSOR = true;
+
 /** Kicks that drive the card "punch" (strength is relative to the loudest kick). */
 export const KICK_MIN_STRENGTH = 0.5;
 export const KICK_MAX_DEV_MS = 20;

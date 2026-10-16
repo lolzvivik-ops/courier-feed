@@ -115,6 +115,15 @@ def buzz() -> np.ndarray:  # missed call: a short phone vibration
     return lp * e
 
 
+def ring() -> np.ndarray:  # incoming call: a short two-tone trill (not the iPhone ringtone); cut by the drop
+    sec = 0.38
+    t = t_axis(sec)
+    trill = (np.sin(2 * np.pi * 21 * t) > 0).astype(float) * 0.5 + 0.5
+    tone = np.sin(2 * np.pi * 1180 * t) + 0.55 * np.sin(2 * np.pi * 1480 * t)
+    e = np.clip(t / 0.01, 0, 1) * np.clip((sec - t) / 0.06, 0, 1)
+    return tone * trill * e * (0.85 + 0.15 * np.sin(2 * np.pi * 7 * t))
+
+
 def toggle() -> np.ndarray:  # switch: knob leaves (soft) and lands (crisper), 38 ms apart
     x = np.zeros(int(0.12 * SR))
     place(x, click(0.004, 1800, 7000), 0.0, 0.55)
@@ -160,7 +169,7 @@ def burst() -> np.ndarray:  # badge pops: a bubble pop and a few sparks
 
 
 SOUNDS = {
-    "pop": pop, "roll": roll, "swoosh": swoosh, "bubble": bubble, "buzz": buzz, "toggle": toggle,
+    "pop": pop, "roll": roll, "swoosh": swoosh, "bubble": bubble, "buzz": buzz, "ring": ring, "toggle": toggle,
     "impact": impact, "press": press, "collapse": collapse, "burst": burst,
 }
 

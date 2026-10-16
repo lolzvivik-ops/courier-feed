@@ -18,3 +18,9 @@ public/generated/
 *.mov
 *.wav
 !public/sfx/*.wav
+
+# Lyrics are copyrighted text: local only (a bullet placeholder is committed).
+lyrics.txt
+src/data/lyrics.json
+.venv-asr/
+lyrics.candidates.json

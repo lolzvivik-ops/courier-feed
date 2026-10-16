@@ -13,6 +13,7 @@ import {openBrowser, renderStill, selectComposition} from '@remotion/renderer';
 import {execFileSync} from 'node:child_process';
 import {mkdirSync} from 'node:fs';
 import path from 'node:path';
+import {webpackOverride} from '../webpack-override.mjs';
 
 const args = process.argv.slice(2);
 const opt = (name, def) => {
@@ -40,7 +41,7 @@ const frames = args.flatMap((a) => {
 });
 
 mkdirSync(outDir, {recursive: true});
-const serveUrl = await bundle({entryPoint: path.resolve('src/index.ts'), onProgress: () => undefined});
+const serveUrl = await bundle({entryPoint: path.resolve('src/index.ts'), onProgress: () => undefined, webpackOverride});
 const browserExecutable = process.env.REMOTION_BROWSER_EXECUTABLE ?? null;
 const browser = await openBrowser('chrome', {browserExecutable});
 const inputProps = {format: comp === 'STFU-1x1' ? '1x1' : '9x16', samples, muted: true, guides};

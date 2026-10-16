@@ -9,7 +9,7 @@ import {MOVE, POP, QUART_OUT, SETTLE, SINE, clamp, lerp, prog, smooth, spring, u
 import {ICON_RADIUS} from '../lib/squircle';
 import {COPY} from '../scenes';
 import {FONT, IOS, useTheme} from '../theme';
-import {scene} from '../timeline';
+import {BEAT, scene} from '../timeline';
 
 export const ICON = 300;
 const W = 800;
@@ -67,7 +67,7 @@ export const IntroThread: React.FC = () => {
 	const sx = (1 / Math.sqrt(stretch)) * (1 + land * 0.75);
 	const rz = inAir ? -4 * Math.sin(Math.PI * u) : 0;
 
-	// --- icon → card (container transform), launched on the kick of beat 3
+	// --- icon → card (container transform), launched on the first word of line 2 (also the bar line)
 	const tm = intro.cue('morph') - LEAD;
 	const k = MORPH(prog(t, tm, 24));
 	const w = lerp(ICON, W, k);
@@ -77,7 +77,7 @@ export const IntroThread: React.FC = () => {
 	const glyphOpacity = 1 - smooth(k / 0.26);
 	const ui = smooth((k - 0.3) / 0.55);
 
-	// --- badge: pops on beat 1, rolls 1 → 47 by beat 2, then becomes the back-button count
+	// --- badge: pops on the first sung word, rolls 1 → 47 to land on the second, then becomes the back-button count
 	const tb = intro.cue('badge');
 	const pop = spring(t - (tb - LEAD), POP);
 	const count = 1 + (COPY.unread - 1) * QUART_OUT(prog(t, tb, intro.cue('counted') - tb));
@@ -88,10 +88,17 @@ export const IntroThread: React.FC = () => {
 	const by = lerp(26, 74, kb) - Math.sin(Math.PI * kb) * 70;
 	const badgeColor = mix([255, 69, 58], [10, 132, 255], kb);
 
-	const idleAmp = 0.75 * smooth(prog(t, 16, 40));
+	// the icon sways more than a card (it is small), settling to card amplitude as it opens
+	const idleAmp = lerp(1.35, 0.75, k) * smooth(prog(t, 16, 40));
+	// "47 unread" breathes on every beat while it waits
+	const beatPulse = (() => {
+		const b = t / BEAT;
+		const d = (b - Math.floor(b)) * BEAT;
+		return t > tb + 24 ? Math.exp(-d / 5) * smooth(d / 1.2) * (1 - kb) : 0;
+	})();
 	const cam = 1 + 0.04 * SINE(prog(t, 0, thread.end));
 
-	// --- bubbles: one per 808 hit; the stack shifts up, the tail hops to the newest
+	// --- one bubble per sung word; the stack shifts up, the tail hops to the newest
 	const arrivals = [0, 1, 2, 3].map((i) => thread.cue(`bubble${i}`) - LEAD);
 	const shift = arrivals.map((a) => clamp(spring(t - a, SETTLE), 0, 1.04));
 	const readAt = thread.cue('read');
@@ -102,6 +109,12 @@ export const IntroThread: React.FC = () => {
 		return o;
 	};
 
+	const iconFloaters: FloaterSpec[] = [
+		{x: -250, y: -190, size: 52, depth: 0.55, kind: 'bubble', color: '#DCDCE2', at: tb + 4, from: {x: 120, y: 90}},
+		{x: 260, y: 150, size: 40, depth: 0.7, kind: 'bubble', color: '#D9E8FF', at: tb + 10, from: {x: -120, y: -70}},
+		{x: -230, y: 230, size: 30, depth: 0.85, kind: 'dot', color: '#E0E0E6', at: tb + 16, from: {x: 100, y: -90}},
+		{x: 240, y: -260, size: 26, depth: 0.9, kind: 'dot', color: '#E3E3EA', at: tb + 22, from: {x: -90, y: 100}},
+	];
 	const floaters: FloaterSpec[] = [
 		{x: -478, y: -250, size: 74, depth: 0.45, kind: 'bubble', color: '#DCDCE2'},
 		{x: 488, y: -360, size: 58, depth: 0.75, kind: 'bubble', color: '#CFE3FF'},
@@ -123,6 +136,7 @@ export const IntroThread: React.FC = () => {
 
 	return (
 		<div style={{position: 'absolute', transform: `scale(${cam.toFixed(5)})`}}>
+			<Floaters specs={iconFloaters} enterAt={tb} exitAt={tm + 4} seed={17} />
 			<Floaters specs={floaters} enterAt={tm + 8} exitAt={exitAt} seed={11} />
 			<Card
 				w={w}
@@ -141,7 +155,7 @@ export const IntroThread: React.FC = () => {
 							value={count}
 							height={bh}
 							color={badgeColor}
-							style={{left: bx, top: by, transform: `scale(${pop.toFixed(4)})`}}
+							style={{left: bx, top: by, transform: `scale(${(pop * (1 + 0.07 * beatPulse)).toFixed(4)})`}}
 						/>
 					) : null
 				}

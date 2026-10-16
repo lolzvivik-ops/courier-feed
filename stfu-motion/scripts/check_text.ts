@@ -7,7 +7,8 @@
  */
 import {readdirSync, readFileSync, statSync} from 'node:fs';
 import path from 'node:path';
-import {COPY, SCENES} from '../src/scenes';
+import {LYRICS} from '../src/lyrics';
+import {COPY} from '../src/scenes';
 
 // Cyrillic, Cyrillic Supplement, Extended-A/B/C — built from code points so this file stays ASCII
 const range = (a: number, b: number) => `${String.fromCodePoint(a)}-${String.fromCodePoint(b)}`;
@@ -46,9 +47,9 @@ const collect = (v: unknown) => {
 	else if (Array.isArray(v)) v.forEach(collect);
 	else if (v && typeof v === 'object') Object.values(v).forEach(collect);
 };
-SCENES.forEach((s) => strings.add(s.text));
+LYRICS.forEach((l) => strings.add(l.words.map((w) => w.display).join(' ')));
 collect(COPY);
-const ALLOWED = /^[\x20-\x7E×·’]*$/;
+const ALLOWED = /^[\x20-\x7E×·’•]*$/;
 console.log('\nOn-screen strings:');
 let odd = 0;
 for (const s of strings) {

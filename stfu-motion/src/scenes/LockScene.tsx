@@ -2,7 +2,7 @@ import React from 'react';
 import {LEAD} from '../config';
 import {Card} from '../components/Card';
 import {Floaters, type FloaterSpec} from '../components/Floaters';
-import {Camera, Flashlight, PhoneArrow} from '../components/Icons';
+import {Camera, Flashlight, PersonFill, PhoneArrow, PhoneFill} from '../components/Icons';
 import {Roulette} from '../components/Roulette';
 import {Squircle} from '../components/Squircle';
 import {MOVE, POP, SETTLE, SINE, clamp, lerp, noise1, prog, smooth, spring, useT} from '../lib/motion';
@@ -88,23 +88,31 @@ export const LockScene: React.FC = () => {
 	const exitAt = scene('focus').start - 8;
 	if (t < enterAt - 2 || t > exitAt + 14) return null;
 
-	const cues = [0, 1, 2, 3].map((i) => lock.cue(`notif${i}`));
+	// one missed call per sung word of the line over this card
+	const cues = COPY.missedCounts.map((_, i) => lock.cue(`notif${i}`));
 	const counts = COPY.missedCounts;
-	// count rolls to the next value on each beat
 	let count: number = counts[0];
 	for (let i = 1; i < cues.length; i++) {
 		count = lerp(count, counts[i], MOVE(prog(t, cues[i] - LEAD, 10)));
 	}
-	// newest notification drops onto the stack; the stack gets deeper behind it
-	let drop = 1;
+	// newest notification drops onto the stack; the stack gets deeper behind it; the phone buzzes
+	let drop = 0;
 	let buzz = 0;
-	for (let i = 1; i < cues.length; i++) {
+	for (let i = 0; i < cues.length; i++) {
 		if (t >= cues[i] - LEAD) drop = spring(t - (cues[i] - LEAD), POP);
 		const d = t - cues[i];
 		if (d >= -1 && d < 16) buzz += Math.sin(d * 2.7) * Math.exp(-Math.max(0, d) / 4) * smooth((d + 1) / 2);
 	}
 	const depth1 = clamp(spring(t - (cues[1] - LEAD), SETTLE), 0, 1.05);
 	const depth2 = clamp(spring(t - (cues[2] - LEAD), SETTLE), 0, 1.05);
+	// the beat before the drop: the Dynamic Island blooms into an incoming call and the phone rings
+	const tIsland = lock.cue('island') - LEAD;
+	const ik = Math.max(0, spring(t - tIsland, POP));
+	const islandUi = smooth(prog(t, tIsland + 5, 8));
+	const ring = t > tIsland ? Math.sin((t - tIsland) * 2.9) * smooth(prog(t, tIsland, 4)) : 0;
+	const iw = lerp(256, 720, ik);
+	const ih = lerp(74, 156, ik);
+	const underIsland = 1 - smooth(prog(t, tIsland, 8));
 	const cam = 1 + 0.04 * SINE(prog(t, lock.start, lock.end - lock.start));
 	const drift = t / 60;
 
@@ -118,7 +126,7 @@ export const LockScene: React.FC = () => {
 	return (
 		<div style={{position: 'absolute', transform: `scale(${cam.toFixed(5)})`}}>
 			<Floaters specs={floaters} enterAt={enterAt + 4} exitAt={exitAt} seed={23} />
-			<Card w={W} h={H} r={70} seed={7} enterAt={enterAt} exitAt={exitAt} x={buzz * 3.2} fill="#14123A">
+			<Card w={W} h={H} r={70} seed={7} enterAt={enterAt} exitAt={exitAt} x={buzz * 3.2 + ring * 2.6} fill="#14123A">
 				{/* wallpaper: night gradient with slowly drifting glows */}
 				<div
 					style={{
@@ -132,12 +140,10 @@ export const LockScene: React.FC = () => {
 						].join(', '),
 					}}
 				/>
-				{/* Dynamic Island */}
-				<div style={{position: 'absolute', left: W / 2 - 128, top: 24, width: 256, height: 74, borderRadius: 37, background: '#000'}} />
-				<div style={{position: 'absolute', left: W / 2 - 17, top: 120}}>
+				<div style={{position: 'absolute', left: W / 2 - 17, top: 120, opacity: underIsland}}>
 					<Padlock size={34} />
 				</div>
-				<div style={{position: 'absolute', left: 0, width: W, top: 166, textAlign: 'center', fontFamily: FONT.ui, fontWeight: 600, fontSize: 40, color: 'rgba(255,255,255,0.88)'}}>
+				<div style={{position: 'absolute', left: 0, width: W, top: 166, textAlign: 'center', fontFamily: FONT.ui, fontWeight: 600, fontSize: 40, color: 'rgba(255,255,255,0.88)', opacity: underIsland}}>
 					{COPY.lock.date}
 				</div>
 				<div
@@ -161,7 +167,7 @@ export const LockScene: React.FC = () => {
 				{/* the stack: two ghost layers, then the live notification on top */}
 				<Note count={0} ghost y={34 * depth2} scale={lerp(1, 0.9, depth2)} opacity={0.75 * clamp(depth2 * 1.5)} />
 				<Note count={0} ghost y={18 * depth1} scale={lerp(1, 0.95, depth1)} opacity={0.9 * clamp(depth1 * 1.5)} />
-				<Note count={count} y={(1 - drop) * -64} scale={lerp(1.05, 1, clamp(drop))} opacity={clamp(drop * 2)} />
+				{drop > 0 ? <Note count={count} y={(1 - drop) * -64} scale={lerp(1.05, 1, clamp(drop))} opacity={clamp(drop * 2)} /> : null}
 
 				{/* bottom controls */}
 				{[
@@ -176,6 +182,29 @@ export const LockScene: React.FC = () => {
 					</div>
 				))}
 				<div style={{position: 'absolute', left: W / 2 - 135, top: H - 32, width: 270, height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.92)'}} />
+
+				{/* Dynamic Island → incoming call */}
+				<div style={{position: 'absolute', left: W / 2 - iw / 2, top: 24 - (ih - 74) * 0.1, width: iw, height: ih, borderRadius: ih / 2, background: '#000', overflow: 'hidden'}}>
+					{islandUi > 0.001 ? (
+						<div style={{position: 'absolute', left: 0, top: 0, width: 720, height: 156, opacity: islandUi, transform: `scale(${lerp(0.92, 1, islandUi)})`, transformOrigin: '50% 50%'}}>
+							<div style={{position: 'absolute', left: 28, top: 28, width: 100, height: 100, borderRadius: 50, background: IOS.orange, overflow: 'hidden', display: 'flex', alignItems: 'flex-end', justifyContent: 'center'}}>
+								<PersonFill size={78} color="rgba(255,255,255,0.92)" />
+							</div>
+							<div style={{position: 'absolute', left: 150, top: 34, fontFamily: FONT.ui, fontWeight: 600, fontSize: 36, color: '#FFFFFF', whiteSpace: 'nowrap'}}>{COPY.contact}</div>
+							<div style={{position: 'absolute', left: 150, top: 82, fontFamily: FONT.ui, fontSize: 27, color: 'rgba(235,235,245,0.6)'}}>{COPY.island.label}</div>
+							{[
+								{x: 720 - 28 - 92 - 18 - 92, bg: IOS.red, rot: 135},
+								{x: 720 - 28 - 92, bg: IOS.green, rot: 0},
+							].map((b) => (
+								<div key={b.x} style={{position: 'absolute', left: b.x, top: 32, width: 92, height: 92, borderRadius: 46, background: b.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: b.rot ? undefined : `scale(${1 + 0.06 * Math.max(0, Math.sin((t - tIsland) * 0.5))})`}}>
+									<div style={{transform: `rotate(${b.rot}deg)`}}>
+										<PhoneFill size={46} color="#FFFFFF" />
+									</div>
+								</div>
+							))}
+						</div>
+					) : null}
+				</div>
 			</Card>
 		</div>
 	);

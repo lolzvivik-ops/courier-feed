@@ -1,5 +1,6 @@
 /**
- * The timeline: SCRIPT (scenes.ts) × beat grid (beats.json) → times.
+ * The timeline: SCRIPT (scenes.ts) × beat grid (beats.json) × sung words
+ * (lyrics.ts) → times.
  *
  * Unit: `t` = time in 60-fps frames from the start of the fragment (float).
  * Components read the current time with useT() in the same unit, so a 30-fps
@@ -7,7 +8,8 @@
  */
 import beatsJson from './data/beats.json';
 import {AUDIO_END, AUDIO_START, KICK_MAX_DEV_MS, KICK_MIN_STRENGTH, SYNC_OFFSET_MS} from './config';
-import {SCENES, type SceneId, type SceneSpec} from './scenes';
+import {LYRICS, lyricWord} from './lyrics';
+import {type Cue, SCENES, type SceneId, type SceneSpec} from './scenes';
 
 const B = beatsJson;
 export const BEAT_SEC = B.tempo.beatPeriod;
@@ -24,7 +26,7 @@ const fail = (msg: string): never => {
 	throw new Error(`[timeline] ${msg}`);
 };
 
-// --- validation: fragment on the grid, script on 8ths, length in range ---------
+// --- validation: fragment on the grid, beat cues on 8ths, length in range ---------
 const nearestDownbeat = B.downbeats.reduce((a, b) => (Math.abs(b - AUDIO_START) < Math.abs(a - AUDIO_START) ? b : a));
 if (Math.abs(nearestDownbeat - AUDIO_START) > 0.005) {
 	fail(`AUDIO_START ${AUDIO_START}s is not on a downbeat (nearest: ${nearestDownbeat}s)`);
@@ -36,17 +38,8 @@ if (Math.abs(AUDIO_START + DURATION_SEC - AUDIO_END) > 0.01) {
 }
 if (DURATION_SEC < 18 || DURATION_SEC > 22) fail(`duration ${DURATION_SEC.toFixed(2)}s outside 18–22 s`);
 const on8th = (x: number) => Math.abs(x * 2 - Math.round(x * 2)) < 1e-6;
-for (const sc of SCENES) {
-	const n = sc.text.split(/\s+/).length;
-	if (n !== sc.words.length) fail(`scene ${sc.id}: ${n} words but ${sc.words.length} word beats`);
-	for (const [name, b] of [...sc.words.map((w, i) => [`word${i}`, w] as const), ['hit', sc.hit.beat] as const, ...Object.entries(sc.cues)]) {
-		if (!on8th(b)) fail(`scene ${sc.id}: ${name} at beat ${b} is not on an 8th`);
-		if (b < 0 || b > sc.bars * 4) fail(`scene ${sc.id}: ${name} at beat ${b} is outside the scene`);
-	}
-}
 
 // --- scenes ---------------------------------------------------------------------
-export type WordT = {text: string; beat: number; t: number};
 export type SceneT = SceneSpec & {
 	index: number;
 	startBeat: number;
@@ -54,9 +47,8 @@ export type SceneT = SceneSpec & {
 	/** t of the first and of the next downbeat */
 	start: number;
 	end: number;
-	wordsT: WordT[];
 	hitT: number;
-	/** t of a scene cue */
+	/** t of a scene cue (a beat, or the onset of a sung word) */
 	cue: (name: string) => number;
 };
 
@@ -64,7 +56,16 @@ let acc = 0;
 export const TL_SCENES: SceneT[] = SCENES.map((sc, index) => {
 	const startBeat = acc;
 	acc += sc.bars * 4;
-	const words = sc.text.split(/\s+/);
+	const at = (c: Cue, name: string): number => {
+		if (typeof c === 'number') {
+			if (!on8th(c)) fail(`scene ${sc.id}: ${name} at beat ${c} is not on an 8th`);
+			if (c < 0 || c > sc.bars * 4) fail(`scene ${sc.id}: ${name} at beat ${c} is outside the scene`);
+			return tAt(startBeat + c);
+		}
+		return lyricWord(c).t;
+	};
+	const resolved: Record<string, number> = {};
+	for (const [name, c] of Object.entries(sc.cues)) resolved[name] = at(c, name);
 	return {
 		...sc,
 		index,
@@ -72,19 +73,23 @@ export const TL_SCENES: SceneT[] = SCENES.map((sc, index) => {
 		endBeat: acc,
 		start: tAt(startBeat),
 		end: tAt(acc),
-		wordsT: words.map((text, i) => ({text, beat: startBeat + sc.words[i], t: tAt(startBeat + sc.words[i])})),
-		hitT: tAt(startBeat + sc.hit.beat),
-		cue: (name: string) => {
-			const b = sc.cues[name];
-			if (b === undefined) fail(`scene ${sc.id} has no cue "${name}"`);
-			return tAt(startBeat + b);
-		},
+		hitT: at(sc.hit.at, 'hit'),
+		cue: (name: string) => resolved[name] ?? fail(`scene ${sc.id} has no cue "${name}"`),
 	};
 });
 
 export const scene = (id: SceneId): SceneT => TL_SCENES.find((s) => s.id === id) ?? fail(`no scene ${id}`);
-export const DROP_T = scene('silence').start;
+export const DROP_T = scene('call').start;
 export const END_T = tAt(totalBars * 4);
+
+/** Word cues must fall inside (or just before) their own card's time on screen. */
+for (const sc of TL_SCENES) {
+	for (const [name, c] of Object.entries(sc.cues)) {
+		if (typeof c === 'number') continue;
+		const t = sc.cue(name);
+		if (t < sc.start - BEAT || t > sc.end + BEAT / 2) fail(`scene ${sc.id}: cue ${name} (word "${lyricWord(c).text}") is outside the scene`);
+	}
+}
 
 // --- kicks → card punches ---------------------------------------------------------
 /** Kick positions on the 16th grid (t), from the detected 808/kick onsets. */
@@ -110,6 +115,7 @@ export const SFX_FILES = {
 	swoosh: {pre: 140},
 	bubble: {pre: 0},
 	buzz: {pre: 0},
+	ring: {pre: 0},
 	toggle: {pre: 0},
 	impact: {pre: 0},
 	press: {pre: 0},
@@ -120,8 +126,8 @@ export const SFX_FILES = {
 const intro = scene('intro');
 const thread = scene('thread');
 const lock = scene('lock');
+const call = scene('call');
 const focus = scene('focus');
-const silence = scene('silence');
 const block = scene('block');
 const outro = scene('outro');
 
@@ -131,24 +137,27 @@ export const SFX: Sfx[] = [
 	sfx('icon-jump', 'pop', intro.hitT, -23),
 	sfx('badge-count', 'roll', intro.cue('badge'), -25),
 	sfx('icon-morph', 'swoosh', intro.cue('morph'), -24),
-	sfx('bubble-0', 'bubble', thread.cue('bubble0'), -23),
-	sfx('bubble-1', 'bubble', thread.cue('bubble1'), -23),
-	sfx('bubble-2', 'bubble', thread.cue('bubble2'), -23),
-	sfx('bubble-3', 'bubble', thread.cue('bubble3'), -22),
-	sfx('missed-call-1', 'buzz', lock.cue('notif1'), -24),
-	sfx('missed-call-3', 'buzz', lock.cue('notif3'), -23),
+	sfx('text-soon', 'bubble', thread.cue('bubble0'), -23),
+	sfx('text-as', 'bubble', thread.cue('bubble1'), -23),
+	sfx('text-die', 'bubble', thread.cue('bubble3'), -23),
+	sfx('missed-we', 'buzz', lock.cue('notif1'), -24),
+	sfx('missed-night', 'buzz', lock.cue('notif4'), -23),
+	sfx('island-ring', 'ring', lock.cue('island'), -24),
+	sfx('drop', 'impact', call.hitT, -23),
+	sfx('decline', 'press', call.cue('decline'), -22),
 	sfx('dnd-toggle', 'toggle', focus.cue('toggle'), -22),
-	sfx('drop', 'impact', silence.hitT, -22),
 	sfx('block-press', 'press', block.cue('press'), -23),
-	sfx('alert-collapse', 'collapse', block.cue('press') + 6, -24),
 	sfx('badge-pop', 'burst', outro.hitT, -21),
 ];
 
 /**
- * Lowpass "dip" of the track before the drop (spec §7): from a 16th after the
- * DND toggle to the drop (≈ 300 ms), in seconds from the fragment start.
+ * Lowpass "dip" of the track before the drop (spec §7): a 16th after the call
+ * alert pops out of the Dynamic Island, up to the drop (≈ 300 ms, no vocal there).
  */
-export const DIP = {start: (focus.cue('toggle') - OFFSET) / 60 + BEAT_SEC / 4, end: (silence.start - OFFSET) / 60, cutoffHz: 380};
+export const DIP = {start: (lock.cue('island') - OFFSET) / 60 + BEAT_SEC / 4, end: (call.start - OFFSET) / 60, cutoffHz: 380};
+
+/** Where the subtitles change (first word of each line), for the scene/line overlap checks. */
+export const LYRIC_LINE_STARTS = LYRICS.map((l) => l.words[0].t);
 
 export const TIMELINE_SUMMARY = {
 	bpm: BPM,
