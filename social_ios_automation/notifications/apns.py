@@ -109,15 +109,17 @@ class APNsClient:
 
     def send(
         self,
-        token:       str,
-        title:       str,
-        body:        str,
-        data:        Optional[Dict[str, Any]] = None,
-        environment: str = "production",   # production | sandbox
-        thread_id:   Optional[str] = None,
-        collapse_id: Optional[str] = None,
-        badge:       Optional[int] = None,
-        sound:       str = "default",
+        token:                str,
+        title:                str,
+        body:                 str,
+        data:                 Optional[Dict[str, Any]] = None,
+        environment:          str = "production",   # production | sandbox
+        thread_id:            Optional[str] = None,
+        collapse_id:          Optional[str] = None,
+        badge:                Optional[int] = None,
+        sound:                str = "default",
+        urgent:               bool = False,
+        deep_link:            Optional[str] = None,
     ) -> APNsResult:
         base_url  = _APNS_PROD if environment == "production" else _APNS_SANDBOX
         apns_id   = str(uuid.uuid4())
@@ -129,14 +131,26 @@ class APNsClient:
         if badge is not None:
             aps["badge"] = badge
 
+        # iOS 15+ interruption levels:
+        #   time-sensitive → breaks focus/DND for urgent operational alerts
+        #   active         → default, honours focus settings
+        if urgent:
+            aps["interruption-level"] = "time-sensitive"
+
         payload: Dict[str, Any] = {"aps": aps}
         if data:
             payload.update(data)
+        if deep_link:
+            payload["deep_link"] = deep_link
+
+        # apns-priority 10 = immediate; 5 = conserve power (non-urgent)
+        apns_priority = "10" if urgent else "5"
 
         headers = {
             "authorization":  f"bearer {self._get_jwt()}",
             "apns-id":        apns_id,
             "apns-topic":     self._topic,
+            "apns-priority":  apns_priority,
             "content-type":   "application/json",
         }
         if thread_id:
@@ -174,8 +188,11 @@ class APNsClient:
         environment: str = "production",
         thread_id:   Optional[str] = None,
         badge:       Optional[int] = None,
+        urgent:      bool = False,
+        deep_link:   Optional[str] = None,
     ) -> List[APNsResult]:
         return [
-            self.send(t, title, body, data, environment, thread_id, badge=badge)
+            self.send(t, title, body, data, environment, thread_id,
+                      badge=badge, urgent=urgent, deep_link=deep_link)
             for t in tokens
         ]
