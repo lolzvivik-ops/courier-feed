@@ -11,6 +11,10 @@
 *.csv
 *.py
 __pycache__/
+
+# Allow the social automation toolkit
+!social_ios_automation/**/*.py
+!social_ios_automation/**/__init__.py
 .DS_Store
 state/
 backups/
@@ -18,3 +22,4 @@ backups/
 # Конфиги проекта (hubs.json, feed_config.json, ai_texts.json) — внутренние.
 # В самом Pages-репозитории JSON не публикуется; фид отдаётся как feed.xml.
 *.json
+!social_ios_automation/**/*.json
